@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#150B45">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mi descanso · Línea 123</title>
+
+<style>
+:root{
+  --tinta:#150B45; --panel:#2B1B8A; --panel2:#3A28AE; --linea:#5C4BC9;
+  --amarillo:#E9E41F; --hueso:#F2F1FF; --lila:#9E93E8; --alerta:#FF8A3D;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--tinta)}
+body{
+  margin:0 auto;max-width:560px;padding:0 15px calc(40px + env(safe-area-inset-bottom));
+  background:var(--tinta);color:var(--hueso);
+  font-family:Archivo,"Segoe UI",Roboto,system-ui,-apple-system,sans-serif;
+  font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums;
+}
+h1,h2,p{margin:0}
+button{font-family:inherit}
+
+header{display:flex;align-items:center;gap:13px;padding:calc(20px + env(safe-area-inset-top)) 2px 18px}
+.marca{display:grid;grid-template-columns:repeat(3,8px);gap:4px;flex:none}
+.marca i{width:8px;height:8px;border-radius:50%;background:var(--amarillo)}
+.marca i:nth-child(-n+3){background:#fff}
+header h1{font-size:19px;font-weight:800;letter-spacing:-.02em}
+header p{font-size:12.5px;color:var(--lila)}
+
+.buscador{position:relative}
+#q{
+  width:100%;padding:15px 44px 15px 16px;border-radius:14px;
+  border:1.5px solid var(--linea);background:var(--panel);color:var(--hueso);
+  font-size:16px;font-weight:600;font-family:inherit
+}
+#q::placeholder{color:var(--lila);font-weight:400}
+#q:focus{outline:2px solid var(--amarillo);outline-offset:1px;border-color:transparent}
+#limpiar{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;
+  border:0;border-radius:50%;background:var(--panel2);color:var(--lila);font-size:18px;
+  line-height:1;cursor:pointer;display:none
+}
+#lista{
+  list-style:none;margin:6px 0 0;padding:6px;position:absolute;z-index:9;left:0;right:0;
+  background:var(--panel2);border:1.5px solid var(--linea);border-radius:14px;
+  max-height:266px;overflow:auto;display:none;box-shadow:0 18px 40px rgba(8,4,34,.6)
+}
+#lista li{padding:11px 12px;border-radius:9px;cursor:pointer;font-size:14.5px}
+#lista li:active{background:var(--amarillo);color:var(--tinta)}
+#lista .vacio{color:var(--lila);font-size:14px}
+
+.fecha{display:flex;gap:8px;margin:12px 0 6px}
+.fecha button,.fecha .dia{
+  border:1.5px solid var(--linea);background:var(--panel);color:var(--hueso);
+  border-radius:12px;height:50px;cursor:pointer;font-size:15px;font-weight:600
+}
+.flecha{width:50px;flex:none;font-size:20px;line-height:1}
+.dia{flex:1;position:relative;overflow:hidden;padding:0 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.dia span{display:block;font-size:14.5px}
+.dia small{display:block;font-size:11.5px;color:var(--lila);font-weight:500;margin-top:1px}
+.dia input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;background:none;cursor:pointer;-webkit-appearance:none;appearance:none}
+#btnHoy{background:none;border:0;color:var(--amarillo);font-size:13px;font-weight:700;cursor:pointer;padding:6px 2px;display:none}
+
+.tarjeta{border-radius:20px;overflow:hidden;background:var(--panel);border:1.5px solid var(--linea);margin-top:8px}
+.identidad{padding:17px 18px 15px;border-bottom:1.5px solid var(--linea)}
+.identidad h2{font-size:16.5px;font-weight:700;line-height:1.3;letter-spacing:-.01em}
+.identidad p{font-size:12.5px;color:var(--lila);margin-top:3px}
+
+.jornada{padding:16px 18px 14px;display:flex;align-items:center;gap:12px;border-bottom:1.5px solid var(--linea)}
+.jornada .etq{
+  flex:none;background:var(--amarillo);color:var(--tinta);border-radius:9px;
+  padding:5px 10px;font-size:13px;font-weight:800;letter-spacing:-.01em
+}
+.jornada b{display:block;font-size:15px;font-weight:700}
+.jornada small{display:block;font-size:12px;color:var(--lila)}
+
+.horas{padding:18px 18px 8px;display:flex;flex-wrap:wrap;gap:9px}
+.horas div{background:rgba(233,228,31,.1);border:1px solid rgba(233,228,31,.3);border-radius:12px;padding:8px 14px 9px;text-align:center}
+.horas b{display:block;font-size:27px;font-weight:800;color:var(--amarillo);line-height:1.05;letter-spacing:-.03em}
+.horas small{display:block;font-size:10.5px;color:var(--lila);margin-top:1px}
+.pie{padding:4px 18px 16px;font-size:12px;color:var(--lila)}
+.pie b{color:var(--hueso);font-weight:600}
+
+.aviso{padding:28px 20px 26px;text-align:center}
+.aviso b{display:block;font-size:30px;font-weight:800;color:var(--alerta);letter-spacing:-.02em}
+.aviso p{font-size:13.5px;color:var(--lila);margin-top:6px}
+.vacia{padding:32px 22px;text-align:center;color:var(--lila);font-size:14.5px;line-height:1.5}
+
+.proximos{margin-top:18px}
+.proximos h2{font-size:12.5px;font-weight:600;color:var(--lila);padding:0 3px 8px}
+.tira{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.tira::-webkit-scrollbar{display:none}
+.tira button{
+  flex:none;width:92px;border:1.5px solid var(--linea);background:var(--panel);
+  color:var(--hueso);border-radius:13px;padding:10px 8px;text-align:left;cursor:pointer
+}
+.tira button[data-hoy=si]{border-color:var(--amarillo)}
+.tira .f{display:block;font-size:12px;color:var(--lila);font-weight:600}
+.tira .t{display:block;font-size:13.5px;font-weight:700;margin-top:3px}
+.tira .n{display:block;font-size:11.5px;color:var(--amarillo);font-weight:700;margin-top:2px}
+.tira .libre{color:var(--alerta)}
+
+footer{margin-top:22px;font-size:11.5px;color:var(--lila);line-height:1.65}
+footer b{color:var(--hueso);font-weight:600}
+
+/* ===== pestañas ===== */
+.menu{display:flex;gap:6px;margin:0 0 12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.menu::-webkit-scrollbar{display:none}
+.menu button{
+  flex:none;border:1.5px solid var(--linea);background:var(--panel);color:var(--lila);
+  border-radius:12px;padding:9px 14px;font-size:13.5px;font-weight:700;cursor:pointer
+}
+.menu button[aria-current=si]{background:var(--amarillo);border-color:var(--amarillo);color:var(--tinta)}
+
+/* ===== turno en grande ===== */
+.grande{padding:26px 20px 22px;text-align:center}
+.grande .quien{font-size:12.5px;color:var(--lila)}
+.grande b{display:block;font-size:52px;font-weight:800;color:var(--amarillo);letter-spacing:-.035em;line-height:1.02;margin-top:6px}
+.grande b.libre{color:var(--alerta)}
+.grande .rango{font-size:17px;font-weight:700;margin-top:6px}
+.grande .nota{font-size:12.5px;color:var(--lila);margin-top:8px}
+.grande .mini{margin-top:14px;padding-top:14px;border-top:1.5px solid var(--linea);font-size:13px;color:var(--lila)}
+.grande .mini b{display:inline;font-size:13px;color:var(--hueso)}
+
+/* ===== grupos ===== */
+.gsel{display:flex;gap:6px;margin-bottom:8px}
+.gsel button{
+  flex:1;border:1.5px solid var(--linea);background:var(--panel);color:var(--hueso);
+  border-radius:12px;padding:10px 4px;cursor:pointer;font-size:13px;font-weight:700
+}
+.gsel button[aria-current=si]{border-color:var(--amarillo);background:var(--panel2)}
+.gsel small{display:block;font-size:10.5px;color:var(--lila);font-weight:600;margin-top:2px}
+.gsel button[aria-current=si] small{color:var(--amarillo)}
+
+.cabeza{padding:16px 18px;border-bottom:1.5px solid var(--linea);display:flex;align-items:center;gap:13px}
+.cabeza .num{
+  flex:none;width:52px;height:52px;border-radius:14px;background:rgba(233,228,31,.12);
+  border:1px solid rgba(233,228,31,.32);color:var(--amarillo);
+  font-size:27px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:-.03em
+}
+.cabeza .num.libre{color:var(--alerta);background:rgba(255,138,61,.1);border-color:rgba(255,138,61,.3);font-size:16px}
+.cabeza h2{font-size:15.5px;font-weight:700}
+.cabeza p{font-size:12.5px;color:var(--lila);margin-top:2px}
+
+ul.nomina{list-style:none;margin:0;padding:6px 0}
+ul.nomina li{padding:9px 18px;font-size:14px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+ul.nomina li + li{border-top:1px solid rgba(92,75,201,.35)}
+ul.nomina span{flex:none;font-size:11.5px;color:var(--lila);font-weight:600}
+ul.nomina li.yo{background:rgba(233,228,31,.09)}
+
+/* ===== ahora ===== */
+.ahora{padding:24px 20px 20px;text-align:center}
+.ahora .rotulo{font-size:12.5px;color:var(--lila)}
+.ahora b{display:block;font-size:64px;font-weight:800;color:var(--amarillo);line-height:1;letter-spacing:-.04em;margin-top:4px}
+.ahora .franja{font-size:16px;font-weight:700;margin-top:8px}
+.ahora .sub{font-size:12.5px;color:var(--lila);margin-top:5px}
+.ahora.sin b{font-size:30px;color:var(--alerta)}
+</style>
+
+<body>
+<header>
+  <div class="marca" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div>
+    <h1>Mi descanso</h1>
+    <p>Línea 123 · Sección 5 · Vestas 1 y 2</p>
+  </div>
+</header>
+
+<nav class="menu" id="menu">
+  <button data-v="persona" aria-current="si">Mi descanso</button>
+  <button data-v="turno">Mi turno</button>
+  <button data-v="grupo">Grupos</button>
+  <button data-v="ahora">Ahora</button>
+</nav>
+
+<div class="buscador" id="cajaBuscador">
+  <input id="q" type="text" placeholder="Escriba su nombre o apellido" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Buscar persona">
+  <button id="limpiar" aria-label="Borrar nombre">×</button>
+  <ul id="lista" role="listbox"></ul>
+</div>
+
+<div id="cajaFecha">
+  <div class="fecha">
+    <button class="flecha" id="ayer" aria-label="Día anterior">‹</button>
+    <label class="dia" id="dia" for="picker">
+      <span id="diaTxt">—</span><small id="diaSub"></small>
+      <input id="picker" type="date" aria-label="Elegir fecha">
+    </label>
+    <button class="flecha" id="manana" aria-label="Día siguiente">›</button>
+  </div>
+  <button id="btnHoy">Volver a hoy</button>
+</div>
+
+<noscript>
+  <div class="tarjeta" style="border-color:var(--alerta)">
+    <div class="aviso">
+      <b>Falta abrirlo en el navegador</b>
+      <p>Está viendo el archivo en el previsualizador del teléfono, que no deja funcionar la app.
+      Ábralo con Chrome o Safari: toque el botón de compartir y elija el navegador,
+      o guárdelo y ábralo desde ahí.</p>
+    </div>
+  </div>
+</noscript>
+
+<main class="tarjeta" id="tarjeta" aria-live="polite"></main>
+
+<main class="tarjeta" id="tarjetaTurno" aria-live="polite" hidden></main>
+
+<section id="vistaGrupo" hidden>
+  <div class="gsel" id="gsel"></div>
+  <main class="tarjeta" id="tarjetaGrupo" aria-live="polite"></main>
+</section>
+
+<section id="vistaAhora" hidden>
+  <main class="tarjeta" id="tarjetaAhora" aria-live="polite"></main>
+</section>
+
+<section class="proximos" id="proximos" hidden>
+  <h2>Los próximos días</h2>
+  <div class="tira" id="tira"></div>
+</section>
+
+<footer>
+  <p><b>Jornada:</b> sale del calendario 2026 de la Línea 123 GD. La sección 5 rota cada cinco días: noche, tarde, media, mañana y descanso.</p>
+  <p><b>Número de descanso:</b> sube un puesto cada día de servicio, del 1 al 5. Los días de descanso no lo mueven.</p>
+</footer>
+
+<script>
+/* ===== nómina: nombre, vesta, número de descanso del 13-sep-2026 ===== */
+const GENTE=[["ALARCON CERRO DAVID MARCEL","V1",2],["BARRETO BERMUDEZ RICARDO ANDRES","V2",2],["BEJARANO BARRETO SONIA ESPERANZA","V2",2],["BOLAÑOS RAMIREZ JHONNY KABIR","V2",2],["BONNETT FONSECA WALTON ANTONY","V2",3],["CAMACHO PABLO","V2",4],["CAÑON GONZALEZ JHON FREDY","V2",1],["CASTAÑEDA FORERO ELKI","V2",5],["CRUZ ROSAS ROSS MARY","V1",2],["FERNANDEZ GOMEZ JUDY JADBLEIDY","V2",4],["GALINDO RODRIGUEZ LEIDY JOHANNA","V2",5],["GUTIERREZ ANTOLINEZ JUAN CAMILO","V1",3],["HANS DAVID RAMIREZ","",2],["JIMENEZ RINCON ALEYDIS MARCELA","V1",4],["LARA MOSQUERA ROSNEY","V2",3],["LONDOÑO SANDRA MILENA","V2",4],["MARTIN BOJACA JULIE DEL PILAR","V2",5],["MARTIN CARDENAS VIRGINIA ALEXANDRA","V1",4],["MARTIN EDWART","V1",2],["MARTINEZ SABOGAL JASBLEIDY","",5],["MARTINEZ SANCHEZ MANUEL","V1",5],["MARTINEZ VIVAS NUBIA ALEJANDRA","V2",2],["MEDINA NATHALIA","",1],["MORALES NIETO GILBERT ROMAN","V1",2],["MORALES PANTOJA ARSHAD NAREN","V2",1],["NEMEGUEN MENESES GINA LIZETH","V2",3],["OCHOA ALANIS","V1",3],["ORTEGA AVILA JONATAN","V1",4],["PADILLA MENDOZA JANNETH","V2",2],["PARADA HERNANDEZ DEIVIT ISAAC","V2",5],["PERALTA BLANCO CLAUDIA LILIANA","V1",5],["PEREZ GOMEZ BRAYAN DAVID","V2",1],["QUIROZ LEON ERIKA PAOLA","V2",5],["REY VALBUENA YINA PAOLA","V1",3],["RINCON PIÑEROS BRAYAN GUILLERMO","V1",1],["RODRIGUEZ ARIAS OLGA JULIETH","V1",1],["RODRIGUEZ VILLAFAÑE YANET","V1",4],["ROJAS BARAHONA OSCAR GIOVANNI","V2",1],["ROJAS VELASQUEZ IVON","",1],["RUBEN JOYAS","",2],["RUIZ SALCEDO LILIANA PATRICIA","V2",3],["RUIZ SUAREZ ADRIANA","",5],["SAMACA MORENO ANGELY","V2",3],["SANCHEZ ESCOBAR INGRID DAYANA","V1",5],["SANCHEZ SOFIA","V1",3],["SANCHEZ TORRES MILENA","V1",5],["SILVA FLORES LILIA MARCELA","V1",3],["SOLIS UCROS SERGIO ENRIQUE","V2",1],["TAVERA MORA OLGA MARCELA","V1",1],["TORO CRUZ ROCIO","V1",4],["TORRES GAMBOA EDNA CAROLINA","V1",4],["URREA CONTRERAS DAVID","V2",5],["VARGAS MARTIN YOLANDA PATRICIA","V2",4],["VILLALOBOS MERCHAN JUAN DAVID","V1",1],["YURY MARCELA RUBIANO GARZON","",2]];
+
+/* ===== jornadas de la sección 5, en el orden en que rotan ===== */
+/* 1-sep-2026 fue noche; de ahí en adelante el ciclo se repite cada 5 días */
+const JORNADAS=[
+ {id:"noche", etq:"Noche",  rango:"21:30 a 05:45", horas:[["22:40","1:35","3:40"],["23:15","2:00","4:05"],["23:50","2:25","4:30"],["0:25","2:50","4:55"],["1:00","3:15","5:20"]]},
+ {id:"tarde", etq:"Tarde",  rango:"17:30 a 21:45", horas:[["19:00"],["19:25"],["19:50"],["20:15"],["20:40"]]},
+ {id:"media", etq:"Media",  rango:"11:30 a 17:45", horas:[["12:40","15:35"],["13:15","16:00"],["13:50","16:25"],["14:25","16:50"],["15:00","17:15"]]},
+ {id:"manana",etq:"Mañana", rango:"05:30 a 11:45", horas:[["6:40","9:35"],["7:15","10:00"],["7:50","10:25"],["8:25","10:50"],["9:00","11:15"]]},
+ {id:"libre", etq:"Descanso", rango:"", horas:null}
+];
+
+const ANCLA_TURNO = new Date(2026,8,1);   // 1-sep-2026 = noche
+const BASE_NUM    = new Date(2026,8,13);  // números tal como salieron ese día
+
+const dias = (a,b) => Math.round((b-a)/86400000);
+const sumar = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+const mod = (a,n) => ((a%n)+n)%n;
+
+const jornadaDe = d => JORNADAS[mod(dias(ANCLA_TURNO,d),5)];
+const esLibre   = d => jornadaDe(d).id === "libre";
+
+function numeroDe(grupo,d){
+  if(esLibre(d)) return null;
+  let paso=0, x=new Date(BASE_NUM);
+  if(d>BASE_NUM){ while(x<d){ x=sumar(x,1); if(!esLibre(x)) paso++; } }
+  else { while(x>d){ if(!esLibre(x)) paso--; x=sumar(x,-1); } }
+  return mod(grupo-1+paso,5)+1;
+}
+
+const DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const CORTO=["dom","lun","mar","mié","jue","vie","sáb"];
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MESC=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+
+const hoy=(()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate());})();
+let fecha=hoy, persona=null;
+
+const $=id=>document.getElementById(id);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const plano=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+
+/* ---- guardar el nombre en el propio celular ---- */
+function guardar(n){ try{ localStorage.setItem("persona123",n); }catch(e){} }
+function recordar(){ try{ return localStorage.getItem("persona123"); }catch(e){ return null; } }
+
+/* ---- buscador ---- */
+function sugerir(txt){
+  const t=plano(txt.trim()); const ul=$("lista");
+  if(!t){ ul.style.display="none"; return; }
+  const r=GENTE.filter(p=>plano(p[0]).includes(t)).slice(0,7);
+  ul.innerHTML = r.length
+    ? r.map(p=>`<li role="option" data-n="${esc(p[0])}">${esc(p[0])}</li>`).join("")
+    : '<li class="vacio">Ese nombre no está en la lista</li>';
+  ul.style.display="block";
+}
+$("q").addEventListener("input",e=>{ $("limpiar").style.display=e.target.value?"block":"none"; sugerir(e.target.value); });
+$("q").addEventListener("focus",e=>sugerir(e.target.value));
+$("lista").addEventListener("click",e=>{ const li=e.target.closest("li[data-n]"); if(li) elegir(li.dataset.n); });
+$("limpiar").addEventListener("click",()=>{ $("q").value=""; persona=null; $("limpiar").style.display="none"; $("lista").style.display="none"; guardar(""); pintar(); $("q").focus(); });
+document.addEventListener("click",e=>{ if(!e.target.closest(".buscador")) $("lista").style.display="none"; });
+
+function elegir(nombre){
+  persona=GENTE.find(p=>p[0]===nombre)||null;
+  if(persona){
+    $("q").value=nombre; $("limpiar").style.display="block";
+    $("lista").style.display="none"; $("q").blur(); guardar(nombre);
+  } else { guardar(""); }
+  pintar();
+}
+
+/* ---- fecha ---- */
+$("ayer").onclick=()=>{ fecha=sumar(fecha,-1); pintar(); };
+$("manana").onclick=()=>{ fecha=sumar(fecha,1); pintar(); };
+$("btnHoy").onclick=()=>{ fecha=hoy; pintar(); };
+$("picker").onchange=e=>{ const p=e.target.value.split("-").map(Number); if(p[0]){ fecha=new Date(p[0],p[1]-1,p[2]); pintar(); } };
+
+/* al tocar la barra se abre el calendario del sistema.
+   En el celular lo abre el propio campo; en el computador hace falta pedirlo. */
+let abriendo=false;
+$("picker").addEventListener("click",()=>{
+  if(abriendo) return;
+  abriendo=true;
+  setTimeout(()=>{ abriendo=false; },400);
+  const p=$("picker");
+  if(typeof p.showPicker==="function"){ try{ p.showPicker(); }catch(err){} }
+});
+
+function pintarFecha(){
+  const dif=dias(hoy,fecha);
+  $("diaTxt").textContent=`${fecha.getDate()} de ${MESES[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+  $("diaSub").textContent = dif===0?"hoy" : dif===1?"mañana" : dif===-1?"ayer" : DIAS[fecha.getDay()];
+  $("picker").value=iso(fecha);
+  $("btnHoy").style.display = dif===0?"none":"block";
+}
+
+/* ---- tarjeta ---- */
+function pintar(){
+  pintarFecha(); pintarTira();
+  const c=$("tarjeta");
+  if(!persona){
+    c.innerHTML='<p class="vacia">Escriba su nombre arriba.<br>La app le muestra el turno del día y las horas de descanso que le corresponden.</p>';
+    $("proximos").hidden=true; return;
+  }
+  $("proximos").hidden=false;
+  const [nombre,vesta,grupo]=persona;
+  const cabeza=`<div class="identidad"><h2>${esc(nombre)}</h2><p>Vesta ${vesta.slice(1)} · Grupo ${grupo}</p></div>`;
+  const j=jornadaDe(fecha);
+
+  if(j.id==="libre"){
+    c.innerHTML=cabeza+'<div class="aviso"><b>Descanso</b><p>Este día la sección 5 no tiene turno.</p></div>';
+    return;
+  }
+  const n=numeroDe(grupo,fecha);
+  const madrugada = j.id==="noche";
+  const chips=j.horas[n-1].map(h=>{
+    const trasnoche = madrugada && +h.split(":")[0] < 6;
+    return `<div><b>${h}</b>${trasnoche?'<small>día siguiente</small>':'<small>&nbsp;</small>'}</div>`;
+  }).join("");
+
+  c.innerHTML = cabeza +
+   `<div class="jornada"><span class="etq">${j.etq}</span><div><b>${j.rango}</b><small>Descanso número ${n} · ${j.horas[n-1].length===1?"un descanso":j.horas[n-1].length+" descansos"}</small></div></div>` +
+   `<div class="horas">${chips}</div>` +
+   `<p class="pie">${madrugada?'El turno arranca la noche del '+fecha.getDate()+' de '+MESES[fecha.getMonth()]+' y termina a las 05:45 del día siguiente.':'&nbsp;'}</p>`;
+}
+
+/* ---- tira de próximos días ---- */
+function pintarTira(){
+  if(!persona) return;
+  const g=persona[2]; let html="";
+  for(let i=0;i<7;i++){
+    const d=sumar(fecha,i), j=jornadaDe(d), n=numeroDe(g,d);
+    const eshoy = dias(hoy,d)===0 ? "si" : "no";
+    html+=`<button data-i="${i}" data-hoy="${eshoy}">
+      <span class="f">${CORTO[d.getDay()]} ${d.getDate()}-${MESC[d.getMonth()]}</span>
+      <span class="t${j.id==="libre"?" libre":""}">${j.etq}</span>
+      <span class="n">${n?"Descanso "+n:"&nbsp;"}</span></button>`;
+  }
+  $("tira").innerHTML=html;
+}
+$("tira").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-i]"); if(!b) return;
+  fecha=sumar(fecha,+b.dataset.i); pintar(); window.scrollTo({top:0,behavior:"smooth"});
+});
+
+/* ===================== VISTAS NUEVAS ===================== */
+
+/* ---- ventanas de descanso: cada grupo entra cuando sale el anterior ---- */
+const minutos = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
+const hhmm = d => d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");
+
+function ventanas(j){
+  const out=[], rondas=j.horas[0].length;
+  for(let r=0;r<rondas;r++){
+    const ini=[];
+    for(let n=0;n<5;n++){
+      let m=minutos(j.horas[n][r]);
+      if(n>0 && m<ini[n-1]) m+=1440;
+      ini.push(m);
+    }
+    for(let n=0;n<5;n++){
+      const paso = n<4 ? ini[n+1]-ini[n] : ini[4]-ini[3];
+      out.push({num:n+1, ini:ini[n], fin:ini[n]+paso});
+    }
+  }
+  return out;
+}
+const enFecha=(D,min)=>new Date(D.getFullYear(),D.getMonth(),D.getDate(),0,min);
+
+/* el turno de noche cruza la medianoche, por eso también se revisa el día anterior */
+function buscarVentana(ahora, desde){
+  for(const off of [0,-1]){
+    const D=sumar(desde,off), j=jornadaDe(D);
+    if(j.id==="libre") continue;
+    for(const v of ventanas(j)){
+      const ini=enFecha(D,v.ini), fin=enFecha(D,v.fin);
+      if(ahora>=ini && ahora<fin) return {D,j,num:v.num,ini,fin,activa:true};
+    }
+  }
+  for(let off=0;off<=2;off++){
+    const D=sumar(desde,off), j=jornadaDe(D);
+    if(j.id==="libre") continue;
+    for(const v of ventanas(j)){
+      const ini=enFecha(D,v.ini);
+      if(ini>ahora) return {D,j,num:v.num,ini,fin:enFecha(D,v.fin),activa:false};
+    }
+  }
+  return null;
+}
+
+const gentePorNumero=(num,D)=>GENTE.filter(p=>numeroDe(p[2],D)===num);
+
+function filaGente(p){
+  const marca = persona && p[0]===persona[0] ? ' class="yo"' : "";
+  const et = p[1] ? "Vesta "+p[1].slice(1)+" · G"+p[2] : "Grupo "+p[2];
+  return `<li${marca}>${esc(p[0])}<span>${et}</span></li>`;
+}
+
+/* ---- Mi turno ---- */
+function pintarTurno(){
+  const c=$("tarjetaTurno"), j=jornadaDe(fecha), libre=j.id==="libre";
+  const n = libre||!persona ? null : numeroDe(persona[2],fecha);
+  let mini="";
+  if(persona && !libre){
+    mini=`<p class="mini">${esc(persona[0])} · descanso número <b>${n}</b> a las <b>${j.horas[n-1].join(" y ")}</b></p>`;
+  }else if(persona && libre){
+    mini=`<p class="mini">${esc(persona[0])} · sin turno este día</p>`;
+  }else{
+    mini=`<p class="mini">Escoja su nombre en Mi descanso y aquí también verá sus horas.</p>`;
+  }
+  c.innerHTML=`<div class="grande">
+    <p class="quien">Sección 5 · ${DIAS[fecha.getDay()]} ${fecha.getDate()} de ${MESES[fecha.getMonth()]}</p>
+    <b class="${libre?"libre":""}">${libre?"Descanso":j.etq}</b>
+    <p class="rango">${libre?"Día sin turno":j.rango}</p>
+    <p class="nota">${j.id==="noche"?"Entra la noche del "+fecha.getDate()+" y sale a las 05:45 del día siguiente.":"&nbsp;"}</p>
+    ${mini}</div>`;
+}
+
+/* ---- Grupos ---- */
+let grupoSel=null;
+function pintarGrupo(){
+  if(!grupoSel) grupoSel = persona ? persona[2] : 1;
+  const libre = esLibre(fecha);
+  $("gsel").innerHTML=[1,2,3,4,5].map(g=>{
+    const n=numeroDe(g,fecha);
+    return `<button data-g="${g}" aria-current="${g===grupoSel?"si":"no"}">Grupo ${g}<small>${n?"desc. "+n:"libre"}</small></button>`;
+  }).join("");
+
+  const gente=GENTE.filter(p=>p[2]===grupoSel).sort((a,b)=>a[0].localeCompare(b[0],"es"));
+  const n=numeroDe(grupoSel,fecha);
+  $("tarjetaGrupo").innerHTML=
+    `<div class="cabeza">
+       <div class="num${libre?" libre":""}">${libre?"—":n}</div>
+       <div><h2>Grupo ${grupoSel} · ${gente.length} personas</h2>
+       <p>${libre?"La sección no tiene turno este día":"Descanso número "+n+" · "+jornadaDe(fecha).etq+" "+jornadaDe(fecha).rango}</p></div>
+     </div>
+     <ul class="nomina">${gente.map(filaGente).join("")}</ul>`;
+}
+$("gsel").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-g]"); if(!b) return;
+  grupoSel=+b.dataset.g; pintarGrupo();
+});
+
+/* ---- Ahora ---- */
+function pintarAhora(){
+  const ahora=new Date();
+  const ini=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate());
+  const r=buscarVentana(ahora,ini);
+  const c=$("tarjetaAhora");
+
+  if(!r){
+    c.innerHTML='<div class="ahora sin"><p class="rotulo">En este momento</p><b>Sin descansos</b><p class="sub">No hay turnos con descanso programado en los próximos días.</p></div>';
+    return;
+  }
+  const gente=gentePorNumero(r.num,r.D).sort((a,b)=>a[0].localeCompare(b[0],"es"));
+  const mismoDia = dias(ini,r.D)===0;
+
+  if(r.activa){
+    c.innerHTML=`<div class="ahora">
+      <p class="rotulo">Está descansando</p><b>${r.num}</b>
+      <p class="franja">${hhmm(r.ini)} a ${hhmm(r.fin)}</p>
+      <p class="sub">${r.j.etq} ${r.j.rango}${mismoDia?"":" · turno del "+r.D.getDate()+" de "+MESES[r.D.getMonth()]}</p>
+    </div><ul class="nomina">${gente.map(filaGente).join("")}</ul>`;
+  }else{
+    const cuando = mismoDia ? "hoy" : dias(ini,r.D)===1 ? "mañana" : "el "+r.D.getDate()+" de "+MESES[r.D.getMonth()];
+    c.innerHTML=`<div class="ahora">
+      <p class="rotulo">Nadie está en descanso ahora · sigue ${cuando}</p><b>${r.num}</b>
+      <p class="franja">${hhmm(r.ini)} a ${hhmm(r.fin)}</p>
+      <p class="sub">${r.j.etq} ${r.j.rango}</p>
+    </div><ul class="nomina">${gente.map(filaGente).join("")}</ul>`;
+  }
+}
+
+/* ---- cambio de pestaña ---- */
+let vista="persona";
+function mostrar(v){
+  vista=v;
+  [...$("menu").children].forEach(b=>b.setAttribute("aria-current", b.dataset.v===v?"si":"no"));
+  $("cajaBuscador").hidden = v!=="persona";
+  $("cajaFecha").hidden    = v==="ahora";
+  $("tarjeta").hidden      = v!=="persona";
+  $("proximos").hidden     = v!=="persona" || !persona;
+  $("tarjetaTurno").hidden = v!=="turno";
+  $("vistaGrupo").hidden   = v!=="grupo";
+  $("vistaAhora").hidden   = v!=="ahora";
+  if(v==="ahora") pintarAhora();
+}
+$("menu").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-v]"); if(b) mostrar(b.dataset.v);
+});
+
+/* cada pintada refresca también las vistas nuevas */
+const pintarSolo=pintar;
+pintar=function(){
+  pintarSolo();
+  try{ pintarTurno(); pintarGrupo(); pintarAhora(); }catch(e){}
+  if(vista) mostrar(vista);
+};
+setInterval(()=>{ if(vista==="ahora") pintarAhora(); }, 60000);
+
+/* ---- arranque ---- */
+try{
+  const guardado=recordar();
+  if(guardado) elegir(guardado); else pintar();
+}catch(err){
+  $("tarjeta").innerHTML='<div class="aviso"><b>No cargó</b><p>'+String(err && err.message ? err.message : err)+'</p></div>';
+}
+</script>
+</body>
+</html>
